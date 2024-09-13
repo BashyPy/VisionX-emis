@@ -1,0 +1,9 @@
+[theme]
+primaryColor = "#D0F0D1"
+backgroundColor = "#FFFFFF"  # white
+secondaryBackgroundColor = "#D0F0D1"
+textColor = "black"
+font = "sans serif"
+
+[server]
+port = 8501

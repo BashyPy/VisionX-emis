@@ -1,0 +1,14 @@
+.history
+venv
+*.bak
+app2.py
+app3.py
+app4.py
+app5.py
+app6.py
+app7.py
+app8.py
+.DS_Store
+QR Codes/
+__pycache__/
+credentials.json
