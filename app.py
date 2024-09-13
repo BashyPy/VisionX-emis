@@ -292,37 +292,6 @@ def insert_or_update_patient(name, age, nin, phone, emergency_contact, genotype,
 
 
 # --------------------------
-# Helper Functions
-# --------------------------
-
-
-def validate_nin(nin):
-    return len(nin) == 11 and nin.isdigit()
-
-
-def validate_phone(phone):
-    phone_digits = re.sub(r'\D', '', phone)
-    if len(phone_digits) == 10:
-        return f"+234{phone_digits}"
-    if len(phone_digits) == 11 and phone_digits.startswith("0"):
-        return f"+234{phone_digits[1:]}"
-    if len(phone_digits) == 13 and phone_digits.startswith("234"):
-        return f"+{phone_digits}"
-    return None
-
-
-def validate_emergency_contact(contact):
-    contact_digits = re.sub(r'\D', '', contact)
-    if len(contact_digits) == 10:
-        return f"+234{contact_digits}"
-    if len(contact_digits) == 11 and contact_digits.startswith("0"):
-        return f"+234{contact_digits[1:]}"
-    if len(contact_digits) == 13 and contact_digits.startswith("234"):
-        return f"+{contact_digits}"
-    return None
-
-
-# --------------------------
 # Main Logic
 # --------------------------
 
@@ -413,6 +382,29 @@ else:
 
     if submitted:
         if consent:
+            def validate_nin(nin):
+                return len(nin) == 11 and nin.isdigit()
+
+            def validate_phone(phone):
+                phone_digits = re.sub(r'\D', '', phone)
+                if len(phone_digits) == 10:
+                    return f"+234{phone_digits}"
+                if len(phone_digits) == 11 and phone_digits.startswith("0"):
+                    return f"+234{phone_digits[1:]}"
+                if len(phone_digits) == 13 and phone_digits.startswith("234"):
+                    return f"+{phone_digits}"
+                return None
+
+            def validate_emergency_contact(contact):
+                contact_digits = re.sub(r'\D', '', contact)
+                if len(contact_digits) == 10:
+                    return f"+234{contact_digits}"
+                if len(contact_digits) == 11 and contact_digits.startswith("0"):
+                    return f"+234{contact_digits[1:]}"
+                if len(contact_digits) == 13 and contact_digits.startswith("234"):
+                    return f"+{contact_digits}"
+                return None
+
             if not validate_nin(nin):
                 st.error("NIN must be exactly 11 digits.")
             else:
@@ -435,7 +427,7 @@ else:
 
                     # Generate the QR code based on the qr_link
                     qr_code = create_qr_code(
-                        qr_link, f"QR_Codes/{name}_{patient_id}.png")
+                        qr_link, f"QR Codes/{name}_{patient_id}.png")
 
                     # Display the generated QR code
                     st.image(
