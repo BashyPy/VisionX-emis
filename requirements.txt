@@ -27,3 +27,4 @@ streamlit_server_state
 gspread
 oauth2client
 pandas
+PyMuPDF
