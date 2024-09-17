@@ -12,3 +12,5 @@ app8.py
 QR Codes/
 __pycache__/
 credentials.json
+*.pdf
+*.docx
