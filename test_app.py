@@ -102,7 +102,8 @@ class TestEmergencyMedicalApp(unittest.TestCase):
         mock_conn.cursor.return_value = mock_cursor
 
         # Simulate fetching patient data
-        mock_cursor.fetchone.return_value = ("John Doe", 30, "12345678901", "+2348012345678")
+        mock_cursor.fetchone.return_value = (
+            "John Doe", 30, "12345678901", "+2348012345678")
 
         # Call function
         patient = get_patient_by_id("PAT1234")
@@ -113,7 +114,8 @@ class TestEmergencyMedicalApp(unittest.TestCase):
         )
 
         # Validate return value
-        self.assertEqual(patient, ("John Doe", 30, "12345678901", "+2348012345678"))
+        self.assertEqual(
+            patient, ("John Doe", 30, "12345678901", "+2348012345678"))
 
     @patch("os.makedirs")
     @patch("segno.make")
@@ -159,10 +161,12 @@ class TestEmergencyMedicalApp(unittest.TestCase):
         invalid_phone_short = "8012345"
 
         # Test for valid 10-digit phone number (format should be +234xxxxxxxxxx)
-        self.assertEqual(validate_phone(valid_phone_10_digits), "+2348012345678")
+        self.assertEqual(validate_phone(
+            valid_phone_10_digits), "+2348012345678")
 
         # Test for valid +234-prefixed phone number
-        self.assertEqual(validate_phone(valid_phone_11_digits), "+2348012345678")
+        self.assertEqual(validate_phone(
+            valid_phone_11_digits), "+2348012345678")
 
         # Test for invalid short phone number
         self.assertIsNone(validate_phone(invalid_phone_short))
@@ -204,7 +208,8 @@ class TestEmergencyMedicalApp(unittest.TestCase):
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchall.return_value = [("John Doe", 30, "12345678901", "+2348012345678")]
+        mock_cursor.fetchall.return_value = [
+            ("John Doe", 30, "12345678901", "+2348012345678")]
 
         mock_worksheet = MagicMock()
 
