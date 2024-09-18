@@ -1,0 +1,13 @@
+services:
+  psychometric-test-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "${APPLICATION_PORT}:${APPLICATION_PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
