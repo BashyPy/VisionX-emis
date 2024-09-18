@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@2.1
+  slack: circleci/slack@4.5.0 # Include Slack Orb for notifications
 
 jobs:
   build:
@@ -22,6 +23,12 @@ jobs:
             LOWERCASE_IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
             docker build -t $REGISTRY/$LOWERCASE_IMAGE_NAME:latest .
             docker push $REGISTRY/$LOWERCASE_IMAGE_NAME:latest
+      - slack/notify:
+          event: fail # Send notification if the build fails
+          template: basic_fail_1
+      - slack/notify:
+          event: pass # Send notification if the build passes
+          template: basic_success_1
 
   scan:
     docker:
@@ -40,6 +47,12 @@ jobs:
           command: |
             LOWERCASE_IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
             trivy image --severity HIGH,CRITICAL $REGISTRY/$LOWERCASE_IMAGE_NAME:latest
+      - slack/notify:
+          event: fail # Send notification if the scan fails
+          template: basic_fail_1
+      - slack/notify:
+          event: pass # Send notification if the scan passes
+          template: basic_success_1
 
 workflows:
   version: 2
