@@ -58,15 +58,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-      - name: Scan Docker image with Trivy (Nightly)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          vuln-type: 'os,library'
-
-      - name: Scan Docker image with Trivy (Dev-2)
+      - name: Scan Docker image with Trivy (main)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
