@@ -1,6 +1,6 @@
 # Use the official Python base image
-FROM python:3.9.18
-#FROM python:3.12.2
+#FROM python:3.9.18
+FROM python:3.12
 
 COPY requirements.txt /app/requirements.txt
 

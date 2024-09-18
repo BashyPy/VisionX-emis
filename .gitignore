@@ -11,6 +11,9 @@ app8.py
 .DS_Store
 QR Codes/
 __pycache__/
-credentials.json
 *.pdf
 *.docx
+.DS_Store
+hadolint
+*.sh
+credentials.json

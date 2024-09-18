@@ -129,15 +129,10 @@ dmypy.json
 .pyre/
 .history/
 .gitconfig
-.streamlit/secrets.toml
 *.pdf
 tmp.Dockerfile
 *.docx
 venv/
-flagged/
-__pycache__/
-.vscode/
+*.sh
 .DS_Store
-nltk_data/.DS_Store
-nltk_data/corpora/.DS_Store
-nltk_data/corpora/framenet_v15/.DS_Store
+credentials.json
