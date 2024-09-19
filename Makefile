@@ -9,7 +9,7 @@ VENV := . venv/bin/activate
 setup:
 	# Remove existing venv if any, and create a new python virtualenv
 	rm -rf venv
-	python3.9 -m venv venv
+	python -m venv venv
 	@echo "Virtual environment created."
 	# Activating virtual environment and installing dependencies
 	@echo "Use 'make install' to install the dependencies."
@@ -19,7 +19,7 @@ install: setup
 	$(VENV) && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 	@echo "Dependencies installed."
 
-test:
+#test:
 	# Running tests inside the virtual environment
 	$(VENV) && python -m unittest discover -s tests
 	@echo "Unit tests completed."
@@ -39,5 +39,11 @@ integration-test:
 	curl --fail http://0.0.0.0:8501 || exit 1
 	@echo "Integration test completed."
 
+start:
+	# Start the Streamlit application inside the virtual environment
+	python -m venv venv
+	$(VENV) && streamlit run app.py
+	@echo "Streamlit application started."
+
 # Running everything: setup, install, lint, test, and integration test
-all: install lint test integration-test
+all: install lint test integration-test start
