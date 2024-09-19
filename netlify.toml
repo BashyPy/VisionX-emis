@@ -1,4 +1,4 @@
 [build]
-  command = "make publish"
+  command = "make all"
   publish = "output"
   environment = { PYTHON_VERSION = "3.9" }
