@@ -13,7 +13,7 @@ on:
       - main
 
 env:
-  REGISTRY: docker.io
+  REGISTRY: ${{ secrets.REGISTRY }}
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE_NAME }}
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
+      id-token: write # needed for signing the images with GitHub OIDC Token
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3.5.2
@@ -58,29 +58,27 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-      # Slack notifications for build
-      - name: Notify Slack on build success
-        if: success()
-        uses: slackapi/slack-github-action@v1.25.0
+      - name: Scan Docker image with Trivy (main)
+        uses: aquasecurity/trivy-action@master
         with:
-          payload: |
-            {
-              "text": "Build succeeded for ${{ github.repository }} on branch ${{ github.ref_name }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Build succeeded for ${{ github.repository }} on branch ${{ github.ref_name }} :white_check_mark:"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          vuln-type: 'os,library'
 
-      - name: Notify Slack on build failure
-        if: failure()
+      - name: Sign the images with GitHub OIDC Token (Non-interactive)
+        run: |
+          IFS=',' read -ra ADDR <<< "${{ steps.meta.outputs.tags }}"
+          for tag in "${ADDR[@]}"; do
+            echo "Signing $tag"
+            cosign sign --oidc-issuer=https://token.actions.githubusercontent.com --yes "$tag"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+
+      # Slack Notification for Failure
+      - name: Send Slack notification on failure
+        if: failure() # Send this only if the build fails
         uses: slackapi/slack-github-action@v1.25.0
         with:
           payload: |
@@ -91,7 +89,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Build failed for ${{ github.repository }} on branch ${{ github.ref_name }} :x:"
+                    "text": "*Build failed* for ${{ github.repository }} on branch ${{ github.ref_name }} :x:"
                   }
                 }
               ]
@@ -99,37 +97,20 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  scan:
-    runs-on: ubuntu-latest
-    steps:
-      - checkout
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get install wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update && sudo apt-get install trivy
-
-      - name: Scan Docker image for vulnerabilities
-        run: |
-          LOWERCASE_IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-          trivy image --severity HIGH,CRITICAL $REGISTRY/$LOWERCASE_IMAGE_NAME:latest
-
-      # Slack notifications for scan
-      - name: Notify Slack on scan success
-        if: success()
+      # Slack Notification for Success
+      - name: Send Slack notification on success
+        if: success() # Send this only if the build succeeds
         uses: slackapi/slack-github-action@v1.25.0
         with:
           payload: |
             {
-              "text": "Scan succeeded for ${{ github.repository }} on branch ${{ github.ref_name }}",
+              "text": "Build succeeded for ${{ github.repository }} on branch ${{ github.ref_name }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Scan succeeded for ${{ github.repository }} on branch ${{ github.ref_name }} :white_check_mark:"
+                    "text": "*Build succeeded* for ${{ github.repository }} on branch ${{ github.ref_name }} :white_check_mark:"
                   }
                 }
               ]
@@ -137,31 +118,12 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Notify Slack on scan failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          payload: |
-            {
-              "text": "Scan failed for ${{ github.repository }} on branch ${{ github.ref_name }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Scan failed for ${{ github.repository }} on branch ${{ github.ref_name }} :x:"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-workflows:
-  version: 2
-  build-and-scan:
-    jobs:
-      - build
-      - scan:
-          requires:
-            - build
+#workflows:
+#  version: 2
+#  build-and-scan:
+#    jobs:
+#      - build
+#      - scan:
+#          requires:
+#            - build
